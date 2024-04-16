@@ -1,24 +1,12 @@
 from django.contrib import admin
-import datetime
-from django.db import models
-
 from .models import Choice, Question
-
-# Register your models here.
+import datetime
 
 class ChoiceInline(admin.TabularInline):
     model = Choice
     extra = 3
-# class QuestionAdmin(admin.ModelAdmin):
-#     fieldsets = [
-#         (None, {"fields": ["question_text"]}),
-#         ("Date information", {"fields": ["pub_date"], "classes": ["collapse"]}),
-#     ]
-#     inlines = [ChoiceInline]
-#     list_display = ["question_text" ,"pub_date", "was_published_recently"]
 
-class Question(models.Model):
-    # ...
+class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["question_text"]}),
         ("Date information", {"fields": ["pub_date"], "classes": ["collapse"]}),
@@ -28,14 +16,12 @@ class Question(models.Model):
     list_filter = ["pub_date"]
     search_fields = ["question_text"]
 
-    @admin.display(
-        boolean=True,
-        ordering="pub_date",
-        description="Published recently?",
-    )
-    def was_published_recently(self):
+    def was_published_recently(self, obj):
         now = datetime.timezone.now()
-        return now - datetime.timedelta(days=1) <= self.pub_date <= now
+        return now - datetime.timedelta(days=1) <= obj.pub_date <= now
 
+    was_published_recently.boolean = True
+    was_published_recently.short_description = "Published recently?"
 
-admin.site.register(Question)
+admin.site.register(Question, QuestionAdmin)
+admin.site.register(Choice)
